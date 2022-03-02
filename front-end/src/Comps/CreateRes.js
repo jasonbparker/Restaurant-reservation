@@ -1,19 +1,14 @@
-import React from "react";
-import { Link, useHistory, useState } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import ResForm from "./ResForm";
+import { createReservations } from "../utils/api";
 
 export default function CreateRes() {
-  const initNewRes = {
-    first_name: "",
-    last_name: "",
-    reservation_date: "",
-    reservation_time: "",
-    people: 0,
-  };
-  const [res, setRes] = useState({ ...initNewRes });
+  const history = useHistory();
+  const [res, setRes] = useState([]);
 
-  const handleSubmit = (newRes) => {};
-  const handleChange = (event) => {
-    setRes({ ...res, [event.target.id]: event.target.value });
+  const handleSubmit = async () => {
+    await createReservations();
   };
 
   return (
@@ -22,18 +17,18 @@ export default function CreateRes() {
         <ol className="breadcrumb">
           <li className="breadcrumb-item">
             <Link to="/">
-              <i className="bi bi-house-door-fill"></i> Home
+              <i className="bi bi-house-door-fill"></i> Cancel
             </Link>
           </li>
           <li className="breadcrumb-item active" aria-current="page">
-            Create Deck
+            Create Reservation
           </li>
         </ol>
       </nav>
 
-      <h1>Create Deck</h1>
+      <h1>Create Reservation</h1>
 
-      <DeckForm handleSubmit={handleSubmit} />
+      <ResForm handleSubmit={handleSubmit} res={res} setRes={setRes} />
     </div>
   );
 }

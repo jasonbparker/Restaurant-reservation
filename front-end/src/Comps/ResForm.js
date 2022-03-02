@@ -1,19 +1,27 @@
-import React from "react";
-import { useState } from "react-router-dom";
+import React, { useState } from "react";
+import { createReservations } from "../utils/api";
 
-const ResForm = ({ handleSubmit }) => {
+const ResForm = () => {
   const initNewRes = {
     first_name: "",
     last_name: "",
+    mobile_number: "",
     reservation_date: "",
     reservation_time: "",
-    people: 0,
+    people: "",
   };
 
   const [res, setRes] = useState({ ...initNewRes });
 
+  console.log(res);
+
   const handleChange = (event) => {
-    setRes({ ...res, [event.target.id]: event.target.value });
+    setRes({ ...res, [event.target.name]: event.target.value });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await createReservations(res);
   };
 
   return (
@@ -24,6 +32,7 @@ const ResForm = ({ handleSubmit }) => {
           name="first_name"
           type="text"
           id="firstName"
+          value={res.first_name}
           onChange={handleChange}
           required
         />
@@ -35,6 +44,18 @@ const ResForm = ({ handleSubmit }) => {
           type="text"
           id="lastName"
           onChange={handleChange}
+          value={res.last_name}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="mobile_number">Mobile number:</label>
+        <input
+          name="mobile_number"
+          type="integer"
+          id="mobile_number"
+          onChange={handleChange}
+          value={res.mobile_number}
           required
         />
       </div>
@@ -45,6 +66,7 @@ const ResForm = ({ handleSubmit }) => {
           type="date"
           id="reservation_date"
           onChange={handleChange}
+          value={res.reservation_date}
           required
         />
       </div>
@@ -55,6 +77,7 @@ const ResForm = ({ handleSubmit }) => {
           type="text"
           id="reservation_time"
           onChange={handleChange}
+          value={res.reservation_time}
           required
         />
       </div>
@@ -62,15 +85,15 @@ const ResForm = ({ handleSubmit }) => {
         <label htmlFor="people">People</label>
         <input
           name="people"
-          type="text"
+          type="number"
           id="people"
           onChange={handleChange}
+          value={res.people}
           required
+          min="1"
         />
       </div>
-      <button type="submit" value="submit">
-        Submit
-      </button>
+      <button type="submit">Submit</button>
     </form>
   );
 };
