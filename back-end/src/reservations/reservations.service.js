@@ -7,12 +7,13 @@ function create(reservation) {
 }
 
 function list(date) {
-  return (
-    knex(tableName)
-      .where("reservation_date", date)
-      //   .whereNotIn("status", ["finished", "cancelled"])
-      .orderBy("reservation_time")
-  );
+  if (date) {
+    return knex("reservations")
+      .select("*")
+      .where({ reservation_date: date })
+      .orderBy("reservation_time");
+  }
+  return knex("reservations").select("*").orderBy("reservation_time");
 }
 
 module.exports = {

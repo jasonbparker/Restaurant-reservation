@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ResForm from "./ResForm";
+import TableForm from "./TableForm";
 
-export default function CreateRes() {
+export default function CreateTable() {
   return (
     <div>
       <nav aria-label="breadcrumb">
@@ -13,14 +13,14 @@ export default function CreateRes() {
             </Link>
           </li>
           <li className="breadcrumb-item active" aria-current="page">
-            Create Reservation
+            Create Table
           </li>
         </ol>
       </nav>
 
-      <h1>Create Reservation</h1>
+      <h1>Create Table</h1>
 
-      <ResForm />
+      <TableForm />
     </div>
   );
 }

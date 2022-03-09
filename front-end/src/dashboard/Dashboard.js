@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { listReservations } from "../utils/api";
+import { Link } from "react-router-dom";
+import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { previous, next, today } from "../utils/date-time";
-
+import useQuery from "../utils/useQuery";
+import LoadTables from "../Comps/LoadTables";
 /**
  * Defines the dashboard page.
  * @param date
@@ -12,17 +14,17 @@ import { previous, next, today } from "../utils/date-time";
 function Dashboard({ date }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
-  const [currentDate, setCurrentDate] = useState(date);
 
-  const nextDate = next(date);
-  console.log(nextDate); // 2022-03-03
+  const newDate = useQuery().get("date") ?? date;
 
-  useEffect(loadDashboard, [date]);
+  console.log(date, newDate);
+
+  useEffect(loadDashboard, [newDate]);
 
   function loadDashboard() {
     const abortController = new AbortController();
     setReservationsError(null);
-    listReservations({ date }, abortController.signal)
+    listReservations({ date: newDate }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
     return () => abortController.abort();
@@ -35,7 +37,29 @@ function Dashboard({ date }) {
         <h4 className="mb-0">Reservations for date</h4>
       </div>
       <ErrorAlert error={reservationsError} />
-      {JSON.stringify(reservations)}
+      {reservations.map((reservation) => (
+        <div>
+          <div>{reservation.first_name}</div>
+          <div>{reservation.last_name}</div>
+          <div>{reservation.mobile_number}</div>
+          <div>{reservation.reservation_date}</div>
+          <div>{reservation.reservation_time}</div>
+          <div>{reservation.people}</div>
+        </div>
+      ))}
+      <div>
+        <div>{newDate}</div>
+        <Link to={`/dashboard?date=${previous(newDate)}`}>
+          <button value="previous">previous</button>
+        </Link>
+        <Link to={`/dashboard?date=${today(date)}`}>
+          <button value="current">current</button>
+        </Link>
+        <Link to={`/dashboard?date=${next(newDate)}`}>
+          <button value="next">next</button>
+        </Link>
+      </div>
+      <LoadTables />
     </main>
   );
 }

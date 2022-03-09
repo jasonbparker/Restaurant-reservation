@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("./reservations.controller");
+const controller = require("./tables.controller");
 
 router.route("/").post(controller.create).get(controller.list);
 

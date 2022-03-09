@@ -1,10 +1,11 @@
 import React from "react";
 
-import { Redirect, Route, Switch, useState } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
 import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
 import CreateRes from "../Comps/CreateRes";
+import CreateTable from "../Comps/CreateTable";
 /**
  * Defines all the routes for the application.
  *
@@ -24,8 +25,14 @@ function Routes() {
       <Route exact={true} path="/reservations/new">
         <CreateRes />
       </Route>
+      <Route exact={true} path="/tables/new">
+        <CreateTable />
+      </Route>
       <Route path="/dashboard">
         <Dashboard date={today()} />
+      </Route>
+      <Route path="/dashboard/:date">
+        <Dashboard />
       </Route>
       <Route>
         <NotFound />
