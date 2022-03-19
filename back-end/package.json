@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "prevTest": "npm run test -- us-01 -- us-02 -- us-03 -- us-04",
+    "prevTest": "npm run test -- us-01 -- us-02 -- us-03 -- us-04 --us-05 --us-06",
     "start:dev": "nodemon --ignore src/db/migrations src/server.js",
     "test": "npx cross-env LOG_LEVEL=warn jest --runInBand --detectOpenHandles --forceExit",
     "test:1": "npm run test -- us-01",

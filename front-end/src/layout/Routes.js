@@ -6,6 +6,9 @@ import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
 import CreateRes from "../Comps/CreateRes";
 import CreateTable from "../Comps/CreateTable";
+import SeatReservation from "../Comps/SeatReservation";
+import Search from "../Comps/Search";
+import EditRes from "../Comps/EditRes";
 /**
  * Defines all the routes for the application.
  *
@@ -25,6 +28,9 @@ function Routes() {
       <Route exact={true} path="/reservations/new">
         <CreateRes />
       </Route>
+      <Route exact={true} path="/reservations/:reservationId/edit">
+        <EditRes />
+      </Route>
       <Route exact={true} path="/tables/new">
         <CreateTable />
       </Route>
@@ -33,6 +39,12 @@ function Routes() {
       </Route>
       <Route path="/dashboard/:date">
         <Dashboard />
+      </Route>
+      <Route path="/reservations/:reservationId/seat">
+        <SeatReservation />
+      </Route>
+      <Route path="/search">
+        <Search />
       </Route>
       <Route>
         <NotFound />

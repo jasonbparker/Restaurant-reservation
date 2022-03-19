@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import { createReservations } from "../utils/api";
-import { useHistory, Link } from "react-router-dom";
+import { updateReservation } from "../utils/api";
+import { useHistory, Link, useParams } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 import { Button } from "react-bootstrap";
 
-const ResForm = () => {
-  const history = useHistory();
-
-  const goToPreviousPath = () => {
-    history.goBack();
-  };
-
+export default function EditRes() {
   const initNewRes = {
     first_name: "",
     last_name: "",
@@ -19,31 +13,49 @@ const ResForm = () => {
     reservation_time: "",
     people: "",
   };
+  // const { reservation = {} } = useLocation();
+  const { reservationId } = useParams();
+
+  const history = useHistory();
+
+  const goToPreviousPath = () => {
+    history.goBack();
+  };
 
   const [res, setRes] = useState(initNewRes);
   const [errors, setErrors] = useState(null);
 
   const handleChange = (event) => {
     let name = event.target.name;
+    console.log("name", name);
     let value = event.target.value;
+    console.log("value", value);
     setRes({ ...res, [name]: value });
+    console.log("res", res);
   };
 
-  const handleSubmit = async (event) => {
+  function handleSubmit(event) {
     if (typeof res.people !== "number") {
       res.people = parseInt(res.people);
     }
     event.preventDefault();
-    try {
-      await createReservations(res);
-      history.push(`/dashboard?date=${res.reservation_date}`);
-    } catch (error) {
-      setErrors(error);
+    const abortController = new AbortController();
+    async function editRes() {
+      try {
+        await updateReservation(res, reservationId, abortController.signal);
+        history.push(`/dashboard?date=${res.reservation_date}`);
+      } catch (error) {
+        setErrors(error);
+      }
     }
-  };
+
+    editRes();
+    return () => abortController.abort();
+  }
 
   return (
     <div>
+      <h1>Edit Reservation #{reservationId}</h1>
       <ErrorAlert error={errors} />
       <form onSubmit={handleSubmit}>
         <div>
@@ -124,6 +136,4 @@ const ResForm = () => {
       </form>
     </div>
   );
-};
-
-export default ResForm;
+}

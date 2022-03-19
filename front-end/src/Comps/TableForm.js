@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
-import { today } from "../utils/date-time";
+import { useHistory, Link } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 import { createTables } from "../utils/api";
+import { Button } from "react-bootstrap";
 
 export default function TableForm() {
   const history = useHistory();
+
+  const goToPreviousPath = () => {
+    history.goBack();
+  };
+
   const initNewTable = {
     table_name: "",
     capacity: "",
@@ -21,10 +26,13 @@ export default function TableForm() {
   };
 
   const handleSubmit = async (event) => {
+    if (typeof table.capacity !== "number") {
+      table.capacity = Number(table.capacity);
+    }
     event.preventDefault();
     try {
       await createTables(table);
-      history.push("/dashboard");
+      history.push("/");
     } catch (error) {
       setErrors(error);
     }
@@ -46,18 +54,23 @@ export default function TableForm() {
           />
         </div>
         <div>
-          <label htmlFor="last_name">Capacity</label>
+          <label htmlFor="capacity">Capacity</label>
           <input
             name="capacity"
             type="number"
             id="capacity"
             onChange={handleChange}
-            value={table.capacity_name}
+            value={table.capacity}
             required
             min="1"
           />
         </div>
-        <button type="submit">Submit</button>
+        <Button type="submit" className="mr-2">
+          <span className="oi oi-check"></span> Submit
+        </Button>
+        <Button variant="secondary" name="cancel" onClick={goToPreviousPath}>
+          <span className="oi oi-x"></span> Cancel
+        </Button>
       </form>
     </div>
   );
