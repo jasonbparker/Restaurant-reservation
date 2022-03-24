@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 import { listReservations, cancelReservation } from "../utils/api";
 import { Table, Button, Form, Row, Col, Container } from "react-bootstrap";
-//import useQuery from "../utils/useQuery";
 
 const Search = () => {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [noRes, setNoRes] = useState(false);
   const history = useHistory();
-
   const [number, setNumber] = useState("");
 
   function loadSearches(e) {
@@ -18,11 +17,13 @@ const Search = () => {
     setReservationsError(null);
     listReservations({ mobile_number: number }, abortController.signal)
       .then(setReservations)
+      .then(setNoRes(true))
       .catch(setReservationsError);
     return () => abortController.abort();
   }
+
   async function cancelRes(reservationId) {
-    if (window.confirm("Are you sure you want to delete this reservation")) {
+    if (window.confirm("Do you want to cancel this reservation?")) {
       try {
         await cancelReservation(reservationId);
         history.go();
@@ -36,6 +37,7 @@ const Search = () => {
     <Container fluid>
       <Row>
         <Col>
+          <ErrorAlert error={reservationsError} />
           <Form onSubmit={loadSearches}>
             <Form.Group>
               <h1>Search Reservations</h1>
@@ -44,7 +46,7 @@ const Search = () => {
                 type="text"
                 id="header-search"
                 placeholder="Enter the customer's mobile number"
-                name="s"
+                name="mobile_number"
                 value={number}
                 onChange={(e) => setNumber(e.target.value)}
               />
@@ -54,7 +56,6 @@ const Search = () => {
 
           {reservations && (
             <div>
-              <ErrorAlert error={reservationsError} />
               <Table>
                 <thead>
                   <tr>
@@ -91,12 +92,13 @@ const Search = () => {
                             <Link
                               to={{
                                 reservation,
-                                pathname: `/reservations/${reservation.reservation_id}/Edit`,
+                                pathname: `/reservations/${reservation.reservation_id}/edit`,
                               }}
                             >
                               <Button>Edit</Button>
                             </Link>
                             <Button
+                              data-reservation-id-cancel={`${reservation.reservation_id}`}
                               onClick={() =>
                                 cancelRes(reservation.reservation_id)
                               }
@@ -110,6 +112,9 @@ const Search = () => {
                   ))}
                 </tbody>
               </Table>
+              {noRes && reservations.length === 0 && (
+                <h1>No reservations found</h1>
+              )}
             </div>
           )}
         </Col>

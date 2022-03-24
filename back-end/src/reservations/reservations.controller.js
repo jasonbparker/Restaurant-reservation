@@ -19,9 +19,9 @@ async function create(req, res) {
   const data = await service.create(req.body.data);
   res.status(201).json({ data });
 }
+
 async function update(req, res) {
   const { reservation_id } = res.locals.reservation;
-  console.log("reservation_id", reservation_id);
   const updatedReservation = {
     ...req.body.data,
     reservation_id,
@@ -38,7 +38,6 @@ async function read(req, res) {
 
 function hasValidFields(req, res, next) {
   const { data = {} } = req.body;
-  console.log("hasValidFields", data);
   const validFields = new Set([
     "first_name",
     "last_name",
@@ -66,7 +65,6 @@ function hasValidFields(req, res, next) {
 
 async function reservationExists(req, res, next) {
   const reservationId = req.params.reservationId;
-  console.log("resIdExists", reservationId);
   const reservation = await service.read(reservationId);
   if (reservation) {
     res.locals.reservation = reservation;
@@ -76,9 +74,9 @@ async function reservationExists(req, res, next) {
     next({ status: 404, message: `Reservation not found: ${reservationId}` });
   }
 }
+
 function isResFinished(req, res, next) {
   const { status } = res.locals.reservation;
-  console.log("isResFinished", status);
   if (status == "finished") {
     return next({ status: 400, message: `status is finished` });
   }
@@ -148,6 +146,7 @@ function bodyDataHas(propertyName) {
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
 }
+
 function isValidNumber(req, res, next) {
   const { data = {} } = req.body;
   if (data["people"] === 0 || !Number.isInteger(data["people"])) {
@@ -155,9 +154,9 @@ function isValidNumber(req, res, next) {
   }
   next();
 }
+
 function checkStatus(req, res, next) {
   const { data = {} } = req.body;
-  console.log("CheckStatus", data);
   if (data["status"] === "finished") {
     return next({ status: 400, message: `status is finished` });
   }
@@ -166,9 +165,9 @@ function checkStatus(req, res, next) {
   }
   next();
 }
+
 function checksStatus(req, res, next) {
   const data = req.body.data;
-  console.log("checksStatus", data);
   if (data["status"] === "unknown") {
     return next({ status: 400, message: `status is undefined/unknown` });
   }
@@ -177,9 +176,7 @@ function checksStatus(req, res, next) {
 
 async function updateStatus(req, res) {
   const { reservation_id } = res.locals.reservation;
-  console.log("resId", reservation_id);
   const { status = null } = req.body.data;
-  console.log("status", status);
   const data = await service.updateStatus(reservation_id, status);
   res.json({ data });
 }

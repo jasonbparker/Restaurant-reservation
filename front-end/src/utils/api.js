@@ -78,7 +78,7 @@ export async function readReservation(params, signal) {
     .then(formatReservationTime);
 }
 
-export async function createReservations(res, signal) {
+export async function createReservation(res, signal) {
   const url = new URL(`${API_BASE_URL}/reservations`);
   const options = {
     method: "POST",
@@ -115,7 +115,7 @@ export async function listTables(signal) {
   return await fetchJson(url, { headers, signal }, []);
 }
 
-export async function createTables(table, signal) {
+export async function createTable(table, signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
   const options = {
     method: "POST",
@@ -127,10 +127,6 @@ export async function createTables(table, signal) {
 }
 
 export async function updateTable(reservationId, tableId, signal) {
-  // console.log("reservation", reservation);
-  // console.log("tableId", tableId);
-  // console.log("signal", signal);
-
   const url = new URL(`${API_BASE_URL}/tables/${tableId}/seat`);
   const options = {
     method: "PUT",

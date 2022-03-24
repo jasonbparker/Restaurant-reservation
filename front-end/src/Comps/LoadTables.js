@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { listTables, clearTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import useQuery from "../utils/useQuery";
 import { Table, Button } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 
-export default function LoadTables({ date, tables, setTables }) {
+export default function LoadTables({ tables, setTables }) {
   const history = useHistory();
   const [tablesError, setTablesError] = useState(null);
 
-  //const newDate = useQuery().get("date") ?? date;
-  console.log(tables);
-
-  useEffect(loadDashboard, []);
+  useEffect(loadDashboard, [setTables]);
 
   function loadDashboard() {
     const abortController = new AbortController();
+
     setTablesError(null);
+
     listTables(abortController.signal).then(setTables).catch(setTablesError);
+
     return () => abortController.abort();
   }
 
@@ -30,12 +29,12 @@ export default function LoadTables({ date, tables, setTables }) {
     ) {
       try {
         await clearTable(table_id, abortController.signal);
-        loadDashboard();
-        // history.go();
+        history.go();
       } catch (error) {
         setTablesError(error);
       }
     }
+    return () => abortController.abort();
   }
   const renderFinishColumn = tables.some(
     (table) => table.reservation_id !== null
@@ -44,7 +43,6 @@ export default function LoadTables({ date, tables, setTables }) {
     <Table>
       <thead>
         <tr>
-          <th>#</th>
           <th>TABLE NAME</th>
           <th>CAPACITY</th>
           <th>FREE?</th>
@@ -53,15 +51,14 @@ export default function LoadTables({ date, tables, setTables }) {
       </thead>
       <tbody>
         <ErrorAlert error={tablesError} />
-        {tables.map((table, i) => (
-          <tr key={i}>
-            <td>{table.table_id}</td>
+        {tables.map((table) => (
+          <tr key={table.table_id}>
             <td>{table.table_name}</td>
             <td>{table.capacity}</td>
             <td data-table-id-status={table.table_id}>
               {!table.reservation_id ? "free" : "occupied"}
             </td>
-            <td data-table-id-finish={table.table_id}>
+            <td>
               {table.reservation_id && (
                 <Button
                   data-table-id-finish={table.table_id}

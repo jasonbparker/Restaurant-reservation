@@ -7,13 +7,8 @@ import useQuery from "../utils/useQuery";
 import LoadTables from "../Comps/LoadTables";
 import { Col, Row, Container, Button } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
+import "./Dashboard.css";
 
-/**
- * Defines the dashboard page.
- * @param date
- *  the date for which the user wants to view reservations.
- * @returns {JSX.Element}
- */
 function Dashboard({ date }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
@@ -23,7 +18,7 @@ function Dashboard({ date }) {
   const newDate = useQuery().get("date") ?? date;
 
   async function cancelRes(reservationId) {
-    if (window.confirm("Are you sure you want to delete this reservation")) {
+    if (window.confirm("Do you want to cancel this reservation?")) {
       try {
         await cancelReservation(reservationId);
         history.go();
@@ -32,8 +27,6 @@ function Dashboard({ date }) {
       }
     }
   }
-
-  console.log(date, newDate);
 
   useEffect(loadDashboard, [newDate]);
 
@@ -50,12 +43,11 @@ function Dashboard({ date }) {
     <Container fluid>
       <Row>
         <Col>
-          <main>
-            <h1>Dashboard</h1>
-            <div className="d-md-flex mb-3">
-              <h4 className="mb-0">Reservations for {newDate}</h4>
-            </div>
-            <div>
+          <main className="main">
+            <div className="d-md-flex mb-3"></div>
+            <ErrorAlert error={reservationsError} />
+            <h1>Reservations for {newDate}</h1>
+            <div className="pad">
               <Link to={`/dashboard?date=${previous(newDate)}`}>
                 <Button value="previous">previous</Button>
               </Link>
@@ -66,61 +58,68 @@ function Dashboard({ date }) {
                 <Button value="next">next</Button>
               </Link>
             </div>
-            <ErrorAlert error={reservationsError} />
-            <Table responsive striped size="sm">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>NAME</th>
-                  <th>PHONE</th>
-                  <th>DATE</th>
-                  <th>TIME</th>
-                  <th>PEOPLE</th>
-                  <th>STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reservations.map((reservation, i) => (
-                  <tr key={reservation.reservation_id}>
-                    <td>{i + 1}</td>
-                    <td>{`${reservation.first_name} ${reservation.last_name}`}</td>
-                    <td>{reservation.mobile_number}</td>
-                    <td>{reservation.reservation_date}</td>
-                    <td>{reservation.reservation_time}</td>
-                    <td>{reservation.people}</td>
-                    <td>{reservation.status}</td>
-                    <td>
-                      {reservation.status == "booked" && (
-                        <div>
-                          <a
-                            className="btn btn-primary"
-                            href={`/reservations/${reservation.reservation_id}/seat`}
-                            size="sm"
-                          >
-                            Seat
-                          </a>
-                          <Link
-                            to={{
-                              reservation,
-                              pathname: `/reservations/${reservation.reservation_id}/Edit`,
-                            }}
-                          >
-                            <Button>Edit</Button>
-                          </Link>
-                          <Button
-                            onClick={() =>
-                              cancelRes(reservation.reservation_id)
-                            }
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-                    </td>
+            <div>{!reservations.length && <h4>No reservations found.</h4>}</div>
+            {reservations.length > 0 && (
+              <Table responsive striped size="sm">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>NAME</th>
+                    <th>PHONE</th>
+                    <th>DATE</th>
+                    <th>TIME</th>
+                    <th>PEOPLE</th>
+                    <th>STATUS</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {reservations.map((reservation, i) => (
+                    <tr key={reservation.reservation_id}>
+                      <td>{i + 1}</td>
+                      <td>{`${reservation.first_name} ${reservation.last_name}`}</td>
+                      <td>{reservation.mobile_number}</td>
+                      <td>{reservation.reservation_date}</td>
+                      <td>{reservation.reservation_time}</td>
+                      <td>{reservation.people}</td>
+                      <td
+                        data-reservation-id-status={`${reservation.reservation_id}`}
+                      >
+                        {reservation.status}
+                      </td>
+                      <td>
+                        {reservation.status === "booked" && (
+                          <div>
+                            <Link
+                              to={{
+                                pathname: `/reservations/${reservation.reservation_id}/seat`,
+                              }}
+                            >
+                              <Button>Seat</Button>
+                            </Link>
+                            <Link
+                              to={{
+                                pathname: `/reservations/${reservation.reservation_id}/edit`,
+                              }}
+                            >
+                              <Button>Edit</Button>
+                            </Link>
+                            <Button
+                              data-reservation-id-cancel={`${reservation.reservation_id}`}
+                              onClick={() =>
+                                cancelRes(reservation.reservation_id)
+                              }
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+            <h1 className="pad">Tables</h1>
             <LoadTables tables={tables} setTables={setTables} />
           </main>
         </Col>

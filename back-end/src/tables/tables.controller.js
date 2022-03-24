@@ -6,10 +6,12 @@ async function create(req, res) {
   const data = await service.create(req.body.data);
   res.status(201).json({ data });
 }
+
 async function list(req, res) {
   const data = await service.list();
   res.json({ data });
 }
+
 async function read(req, res) {
   const data = res.locals.foundTable;
   res.status(200).json({ data });
@@ -17,7 +19,6 @@ async function read(req, res) {
 
 function dataExists(req, res, next) {
   const data = req.body.data;
-  console.log("dataExists:data", data);
   if (!data) {
     return next({
       status: 400,
@@ -29,9 +30,7 @@ function dataExists(req, res, next) {
 
 async function update(req, res) {
   const { foundTable } = res.locals;
-  console.log("update:foundTable", foundTable);
   const { data: newData } = req.body;
-  console.log("update:newData", newData);
   const data = await service.update(newData, foundTable.table_id);
   res.json({ data });
 }
@@ -47,7 +46,6 @@ async function resIdExists(req, res, next) {
   const reservation = await reservationsService.read(reservation_id);
   if (reservation) {
     res.locals.reservation = reservation;
-    console.log("res locals", res.locals.reservation);
     return next();
   } else {
     next({
@@ -56,9 +54,9 @@ async function resIdExists(req, res, next) {
     });
   }
 }
+
 function isResSeated(req, res, next) {
   const { status } = res.locals.reservation;
-  console.log("isResSeated", status);
   if (status == "seated") {
     return next({ status: 400, message: "reservation is already seated" });
   }
@@ -67,45 +65,29 @@ function isResSeated(req, res, next) {
 
 async function tableExists(req, res, next) {
   const { table_id } = req.params;
-  console.log("table_iD", table_id);
   const foundTable = await service.read(table_id);
   if (foundTable) {
     res.locals.foundTable = foundTable;
-    //console.log("res locals foundTable", res.locals.foundTable);
     return next();
   } else {
     next({ status: 404, message: `table not found: ${table_id}` });
   }
 }
-// function isTableOccupied(req, res, next) {
-//   const occupied = res.locals.foundTable.reservation_id;
-//   //console.log("occupied", occupied);
-//   if (occupied) {
-//     return next();
-//   }
-//   return next({
-//     status: 400,
-//     message: `Table is not occupied. Can only finish occupied tables`,
-//   });
-// }
+
 function isTableOccupied(req, res, next) {
   const { foundTable } = res.locals;
-  console.log(foundTable);
   if (foundTable.reservation_id === null) {
     return next({
       status: 400,
       message: "Table is not occupied.",
     });
   }
-
   next();
 }
 
 async function destroy(req, res, next) {
   const { table_id } = req.params;
-  console.log("tableId", table_id);
   const { foundTable } = res.locals;
-  console.log("foundtable", foundTable);
   await service.clearTable(table_id, foundTable.reservation_id);
   res.status(200).json({});
 }
@@ -120,11 +102,10 @@ function tableIsFree(req, res, next) {
   }
   next();
 }
+
 function canResFitAtTable(req, res, next) {
   const people = res.locals.reservation.people;
-  console.log("people", people);
   const capacity = res.locals.foundTable.capacity;
-  console.log("capacity", capacity);
   if (people > capacity) {
     return next({
       status: 400,
@@ -144,10 +125,10 @@ function bodyDataHas(propertyName) {
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
 }
+
 function isValidCap(propertyName) {
   return function (req, res, next) {
     const data = req.body.data;
-    //console.log(data, propertyName, data[propertyName]);
     if (typeof data[propertyName] === "number") {
       return next();
     }
@@ -158,7 +139,6 @@ function isValidCap(propertyName) {
 function hasLength(propertyName) {
   return function (req, res, next) {
     const data = req.body.data;
-    console.log(data, propertyName, data[propertyName]);
     if (data[propertyName].length < 2) {
       return next({ status: 400, message: `table_name is too short.` });
     }

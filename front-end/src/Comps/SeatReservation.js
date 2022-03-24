@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory, Link, useParams } from "react-router-dom";
 import { listTables, updateTable, readReservation } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+import { Col, Row, Container, Button, Form } from "react-bootstrap";
 
 export default function SeatReservation() {
   const [tables, setTables] = useState([]);
@@ -10,16 +11,9 @@ export default function SeatReservation() {
   const [errors, setErrors] = useState(null);
   const history = useHistory();
   const { reservationId } = useParams();
-  // const reservationId = window.location.pathname.split("/")[1];
-  // console.log(window.location.pathname);
-  // console.log(reservation);
 
   function handleChange(event) {
-    //let name = event.target.name;
     let value = event.target.value;
-    console.log("value", value);
-    // console.log("reservation", reservation);
-    // console.log("resID", reservationId);
     setSeat(value);
   }
 
@@ -53,33 +47,40 @@ export default function SeatReservation() {
       .catch((error) => console.log(error));
 
     return () => abortController.abort();
-  }, []);
-  console.log("reservation", reservation);
-  console.log("reservationId", reservationId);
+  }, [reservationId]);
 
   return (
-    <div>
-      <ErrorAlert error={errors} />
-      <div>Seat Reservation</div>
-      <div>
-        #{reservationId} - {reservation.first_name} {reservation.last_name} on{" "}
-        {reservation.reservation_date} at {reservation.reservation_time} for{" "}
-        {reservation.people}
-      </div>
-      <select required onChange={handleChange} name="table_id">
-        <option value="">select a seat</option>
-        {tables.map((table, i) => (
-          <option key={i} value={table.table_id}>
-            {table.table_name} - {table.capacity}
-          </option>
-        ))}
-      </select>
-      <button type="submit" onClick={handleSubmit}>
-        Submit
-      </button>
-      <Link to="/">
-        <button>Cancel</button>
-      </Link>
-    </div>
+    <Container fluid>
+      <Row>
+        <Col>
+          <div>
+            <ErrorAlert error={errors} />
+            <h1>Seat Reservation</h1>
+            <h3>
+              #{reservationId} - {reservation.first_name}{" "}
+              {reservation.last_name}
+            </h3>
+            <h3>on {reservation.reservation_date}</h3>
+            <h3>
+              at {reservation.reservation_time} for {reservation.people}
+            </h3>
+            <Form.Select required onChange={handleChange} name="table_id">
+              <option value="">select a seat</option>
+              {tables.map((table) => (
+                <option key={table.table_id} value={table.table_id}>
+                  {table.table_name} - {table.capacity}
+                </option>
+              ))}
+            </Form.Select>
+            <Button type="submit" onClick={handleSubmit}>
+              Submit
+            </Button>
+            <Link to="/">
+              <Button>Cancel</Button>
+            </Link>
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }

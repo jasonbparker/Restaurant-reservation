@@ -14,16 +14,6 @@ function read(table_id) {
   return knex("tables").select("*").where({ table_id }).first();
 }
 
-// function update(reservation_id, table_id) {
-//   //console.log(reservation_id);
-//   return knex("tables")
-//     .select("*")
-//     .where({ table_id })
-//     .update(reservation_id)
-//     .returning("*")
-//     .then((data) => data[0]);
-// }
-
 function update(reservation_id, table_id) {
   return knex("reservations")
     .where(reservation_id)

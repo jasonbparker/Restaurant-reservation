@@ -79,25 +79,23 @@ describe("US-05 - Finish an occupied table - E2E", () => {
         );
         await dialog.accept();
       });
-      console.log("finishbuttonselector", finishButtonSelector);
       await page.click(finishButtonSelector);
       await page.waitForResponse((response) => {
-        console.log(response, "---------------------------");
         return response.url().endsWith(`/tables`);
       });
 
-      // await page.screenshot({
-      //   path: ".screenshots/us-05-dashboard-finish-button-after.png",
-      //   fullPage: true,
-      // });
+      await page.screenshot({
+        path: ".screenshots/us-05-dashboard-finish-button-after.png",
+        fullPage: true,
+      });
 
-      // const containsFree = await containsText(
-      //   page,
-      //   `[data-table-id-status="${table.table_id}"]`,
-      //   "free"
-      // );
+      const containsFree = await containsText(
+        page,
+        `[data-table-id-status="${table.table_id}"]`,
+        "free"
+      );
 
-      // expect(containsFree).toBe(true);
+      expect(containsFree).toBe(true);
     });
 
     test("clicking finish button and then clicking CANCEL does nothing", async () => {
