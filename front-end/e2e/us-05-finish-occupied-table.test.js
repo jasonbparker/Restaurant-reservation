@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-const { setDefaultOptions } = require('expect-puppeteer');
+const { setDefaultOptions } = require("expect-puppeteer");
 const fs = require("fs");
 const fsPromises = fs.promises;
 
@@ -79,9 +79,7 @@ describe("US-05 - Finish an occupied table - E2E", () => {
         );
         await dialog.accept();
       });
-
       await page.click(finishButtonSelector);
-
       await page.waitForResponse((response) => {
         return response.url().endsWith(`/tables`);
       });

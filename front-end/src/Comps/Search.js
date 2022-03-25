@@ -1,21 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { listReservations, cancelReservation } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import { previous, next, today } from "../utils/date-time";
-import useQuery from "../utils/useQuery";
-import LoadTables from "../Comps/LoadTables";
-import { Col, Row, Container, Button } from "react-bootstrap";
-import Table from "react-bootstrap/Table";
-import "./Dashboard.css";
+import { listReservations, cancelReservation } from "../utils/api";
+import { Table, Button, Form, Row, Col, Container } from "react-bootstrap";
 
-function Dashboard({ date }) {
+const Search = () => {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [noRes, setNoRes] = useState(false);
   const history = useHistory();
-  const [tables, setTables] = useState([]);
+  const [number, setNumber] = useState("");
 
-  const newDate = useQuery().get("date") ?? date;
+  function loadSearches(e) {
+    e.preventDefault();
+    const abortController = new AbortController();
+    setReservationsError(null);
+    listReservations({ mobile_number: number }, abortController.signal)
+      .then(setReservations)
+      .then(setNoRes(true))
+      .catch(setReservationsError);
+    return () => abortController.abort();
+  }
 
   async function cancelRes(reservationId) {
     if (window.confirm("Do you want to cancel this reservation?")) {
@@ -28,39 +33,30 @@ function Dashboard({ date }) {
     }
   }
 
-  useEffect(loadDashboard, [newDate]);
-
-  function loadDashboard() {
-    const abortController = new AbortController();
-    setReservationsError(null);
-    listReservations({ date: newDate }, abortController.signal)
-      .then(setReservations)
-      .catch(setReservationsError);
-    return () => abortController.abort();
-  }
-
   return (
     <Container fluid>
       <Row>
         <Col>
-          <main className="main">
-            <div className="d-md-flex mb-3"></div>
-            <ErrorAlert error={reservationsError} />
-            <h1>Reservations for {newDate}</h1>
-            <div className="pad">
-              <Link to={`/dashboard?date=${previous(newDate)}`}>
-                <Button value="previous">previous</Button>
-              </Link>
-              <Link to={`/dashboard?date=${today(date)}`}>
-                <Button value="current">current</Button>
-              </Link>
-              <Link to={`/dashboard?date=${next(newDate)}`}>
-                <Button value="next">next</Button>
-              </Link>
-            </div>
-            <div>{!reservations.length && <h4>No reservations found.</h4>}</div>
-            {reservations.length > 0 && (
-              <Table responsive striped size="sm">
+          <ErrorAlert error={reservationsError} />
+          <Form onSubmit={loadSearches}>
+            <Form.Group>
+              <h1>Search Reservations</h1>
+              <p>Mobile Number:</p>
+              <Form.Control
+                type="text"
+                id="header-search"
+                placeholder="Enter the customer's mobile number"
+                name="mobile_number"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+              />
+              <Button type="submit">Find</Button>
+            </Form.Group>
+          </Form>
+
+          {reservations && (
+            <div>
+              <Table>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -81,16 +77,13 @@ function Dashboard({ date }) {
                       <td>{reservation.reservation_date}</td>
                       <td>{reservation.reservation_time}</td>
                       <td>{reservation.people}</td>
-                      <td
-                        data-reservation-id-status={`${reservation.reservation_id}`}
-                      >
-                        {reservation.status}
-                      </td>
+                      <td>{reservation.status}</td>
                       <td>
                         {reservation.status === "booked" && (
                           <div>
                             <Link
                               to={{
+                                reservation,
                                 pathname: `/reservations/${reservation.reservation_id}/seat`,
                               }}
                             >
@@ -98,6 +91,7 @@ function Dashboard({ date }) {
                             </Link>
                             <Link
                               to={{
+                                reservation,
                                 pathname: `/reservations/${reservation.reservation_id}/edit`,
                               }}
                             >
@@ -118,14 +112,15 @@ function Dashboard({ date }) {
                   ))}
                 </tbody>
               </Table>
-            )}
-            <h1 className="pad">Tables</h1>
-            <LoadTables tables={tables} setTables={setTables} />
-          </main>
+              {noRes && reservations.length === 0 && (
+                <h1>No reservations found</h1>
+              )}
+            </div>
+          )}
         </Col>
       </Row>
     </Container>
   );
-}
+};
 
-export default Dashboard;
+export default Search;

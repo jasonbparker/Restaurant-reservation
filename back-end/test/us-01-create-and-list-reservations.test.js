@@ -8,7 +8,8 @@ describe("US-01 - Create and list reservations", () => {
     return knex.migrate
       .forceFreeMigrationsLock()
       .then(() => knex.migrate.rollback(null, true))
-      .then(() => knex.migrate.latest());
+      .then(() => knex.migrate.latest())
+      .catch((error) => console.log("error", error));
   });
 
   beforeEach(() => {
@@ -25,7 +26,6 @@ describe("US-01 - Create and list reservations", () => {
         const response = await request(app)
           .get("/fastidious")
           .set("Accept", "application/json");
-
         expect(response.status).toBe(404);
         expect(response.body.error).toBe("Path not found: /fastidious");
       });
