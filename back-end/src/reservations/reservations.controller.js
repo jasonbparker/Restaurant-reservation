@@ -83,55 +83,50 @@ function isResFinished(req, res, next) {
   next();
 }
 
-function hasValidTime(req, res, next) {
-  const {
-    data: { reservation_time },
-  } = req.body;
-  const validTimeFormat = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/;
+function isValid(req, res, next) {
+  const { reservation_date, reservation_time, people } = req.body.data;
+  let today = new Date();
+  let day = `${reservation_date}  ${reservation_time}`;
+  let resAsDate = new Date(day);
+  const validNumber = Number.isInteger(people);
 
-  if (!reservation_time) {
-    next({
-      status: 400,
-      message: `reservation_time cannot be empty. Please select a time.`,
-    });
-  }
-  if (!reservation_time.match(validTimeFormat)) {
+  const timeFormat = /\d\d:\d\d/;
+  const dateReg = /^\d{4}\-\d{1,2}\-\d{1,2}$/;
+  if (reservation_time.match(timeFormat) === null) {
     return next({
       status: 400,
-      message: `the reservation_time must be a valid time in the format '12:30`,
+      message: `The reservation_time is not valid.`,
     });
   }
-  if (reservation_time <= "10:29:59") {
-    next({
-      status: 400,
-      message: "The restaurant does not open until 10:30 a.m.",
-    });
-  } else {
-    if (reservation_time >= "21:30:00") {
-      next({
-        status: 400,
-        message: `The restaurant closes at 22:30 (10:30 pm). Please schedule your reservation at least one hour before close.`,
-      });
-    }
-  }
-  next();
-}
 
-function isValidDate(req, res, next) {
-  const { data = {} } = req.body;
-  const reservation_date = new Date(data["reservation_date"]);
-  const day = reservation_date.getUTCDay();
-
-  if (isNaN(Date.parse(data["reservation_date"]))) {
-    return next({ status: 400, message: `Invalid reservation_date` });
-  }
-  if (day === 2) {
-    return next({ status: 400, message: `Restaurant is closed on Tuesdays` });
-  }
-  if (reservation_date < new Date()) {
+  if (!reservation_date.match(dateReg)) {
     return next({
       status: 400,
-      message: `Reservation must be set in the future`,
+      message: `The reservation_date is not valid.`,
+    });
+  }
+  if (resAsDate.getDay() === 2) {
+    return next({
+      status: 400,
+      message: `The Restaurant is closed on Tuesdays.`,
+    });
+  }
+  if (resAsDate < today) {
+    return next({
+      status: 400,
+      message: "Reservation must be booked for future date.",
+    });
+  }
+  if (reservation_time < "10:30" || reservation_time > "21:30") {
+    return next({
+      status: 400,
+      message: "Reservation must be between 10:30AM and 9:30PM.",
+    });
+  }
+  if (!validNumber || people <= 0) {
+    return next({
+      status: 400,
+      message: "You cannot make a reservation for 0 people.",
     });
   }
   next();
@@ -145,14 +140,6 @@ function bodyDataHas(propertyName) {
     }
     next({ status: 400, message: `Must include a ${propertyName}` });
   };
-}
-
-function isValidNumber(req, res, next) {
-  const { data = {} } = req.body;
-  if (data["people"] === 0 || !Number.isInteger(data["people"])) {
-    return next({ status: 400, message: `Invalid number of people` });
-  }
-  next();
 }
 
 function checkStatus(req, res, next) {
@@ -197,9 +184,7 @@ module.exports = {
     has_reservation_date,
     has_reservation_time,
     has_people,
-    isValidDate,
-    hasValidTime,
-    isValidNumber,
+    isValid,
     checkStatus,
     asyncErrorBoundary(create),
   ],
@@ -219,9 +204,7 @@ module.exports = {
     has_reservation_date,
     has_reservation_time,
     has_people,
-    isValidDate,
-    hasValidTime,
-    isValidNumber,
+    isValid,
     checkStatus,
     asyncErrorBoundary(reservationExists),
     asyncErrorBoundary(update),
