@@ -7,7 +7,9 @@ import { today } from "../utils/date-time";
 import CreateTable from "../Comps/CreateTable";
 import SeatReservation from "../Comps/SeatReservation";
 import Search from "../Comps/Search";
-import EditAndCreateRes from "../Comps/EditAndCreateRes";
+import CreateRes from "../Comps/CreateRes";
+import EditRes from "../Comps/EditRes";
+
 /**
  * Defines all the routes for the application.
  *
@@ -25,10 +27,10 @@ function Routes() {
         <Redirect to={"/dashboard"} />
       </Route>
       <Route exact={true} path="/reservations/new">
-        <EditAndCreateRes />
+        <CreateRes />
       </Route>
       <Route exact={true} path="/reservations/:reservationId/edit">
-        <EditAndCreateRes />
+        <EditRes />
       </Route>
       <Route exact={true} path="/tables/new">
         <CreateTable />
